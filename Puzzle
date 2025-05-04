@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Water Shot Puzzle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Baloo 2', cursive;
+      background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+      background-attachment: fixed;
+      color: #fff;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: rgba(0,0,0,0.6);
+    }
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    nav a {
+      margin-left: 1.5rem;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    .hero {
+      text-align: center;
+      padding: 5rem 1rem;
+      background: rgba(0, 0, 0, 0.4);
+      background-blend-mode: overlay;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      animation: splash 1s ease-in-out infinite alternate;
+    }
+    @keyframes splash {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+    .hero p {
+      font-size: 1.25rem;
+      margin-top: 1rem;
+    }
+    .buttons {
+      margin-top: 2rem;
+    }
+    .buttons a {
+      text-decoration: none;
+    }
+    .buttons .play {
+      margin: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background-color: #2196F3;
+      color: #fff;
+      display: inline-block;
+    }
+    .section {
+      padding: 3rem 1rem;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+    .features, .screenshots, .leaderboard {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .feature-item, .screenshot, .leaderboard-entry {
+      margin: 1rem;
+      max-width: 250px;
+    }
+    .cta {
+      text-align: center;
+      padding: 2rem;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    footer {
+      padding: 1rem;
+      background-color: rgba(0,0,0,0.7);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    footer a {
+      margin: 0 0.5rem;
+      color: #ccc;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Water Shot Puzzle</div>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#play">Play Now</a>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#settings">Settings</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Water Shot Puzzle</h1>
+    <p>Test your brain by sorting water by color. Can you beat all the levels?</p>
+    <div class="buttons">
+      <a href="Game"><button class="play">🔵 Play Now</button></a>
+    </div>
+  </section>
+
+  <section class="section features">
+    <div class="feature-item">🧠 <strong>Train Your Brain</strong><br>Challenging puzzles with increasing difficulty.</div>
+    <div class="feature-item">🌈 <strong>Colorful Design</strong><br>3D test tubes with water animations and sound effects.</div>
+    <div class="feature-item">📱 <strong>Play Anywhere</strong><br>Mobile, tablet, and desktop friendly.</div>
+  </section>
+
+  <section class="section screenshots">
+    <h2>📸 Screenshot Preview</h2>
+    <div class="screenshot">Early level</div>
+    <div class="screenshot">Complex level</div>
+    <div class="screenshot">Win screen</div>
+  </section>
+
+  <section class="section leaderboard" id="leaderboard">
+    <h2>🏆 Leaderboard Preview</h2>
+    <div class="leaderboard-entry">1. PlayerOne - 9990 pts</div>
+    <div class="leaderboard-entry">2. BrainyJane - 9820 pts</div>
+    <div class="leaderboard-entry">3. WaterWizard - 9745 pts</div>
+    <button class="play">View Full Leaderboard</button>
+  </section>
+
+  <section class="cta">
+    <h2>📥 Ready to dive in?</h2>
+    <button class="play">🔥 Start Game Now</button>
+  </section>
+
+  <footer>
+    <a href="#">About</a> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a><br>
+    © 2025 Water Shot Puzzle
+  </footer>
+</body>
+</html>

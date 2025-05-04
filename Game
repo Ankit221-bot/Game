@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Water Sort Puzzle</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle, rgba(58, 123, 213, 1) 0%, rgba(255, 223, 255, 1) 100%);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background-attachment: fixed;
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-size: 3em;
+      color: #ffffff;
+      text-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+      animation: pulse 2s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    #controls {
+      margin: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 25px;
+      border: none;
+      background: linear-gradient(to right, #42a5f5, #1e88e5);
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #1e88e5, #1565c0);
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #game {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .tube {
+      width: 80px;
+      height: 240px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      border: 4px solid #8e8e8e;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      margin: 10px;
+      display: flex;
+      flex-direction: column-reverse;
+      padding: 5px;
+      cursor: pointer;
+      position: relative;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.6));
+    }
+
+    .tube:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .tube.selected {
+      border-color: #2196f3;
+      box-shadow: 0 0 15px #2196f3;
+    }
+
+    .segment {
+      height: 25%;
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+
+    .segment:hover {
+      opacity: 0.8;
+    }
+
+    #win-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    #win-animation h2 {
+      color: #fff;
+      font-size: 3.5em;
+      animation: pop 0.6s ease-out infinite alternate;
+    }
+
+    @keyframes pop {
+      from { transform: scale(1); }
+      to { transform: scale(1.2); }
+    }
+
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 20;
+      display: none;
+    }
+
+    .confetti div {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: #ff0;
+      animation: confettiFall 1.5s ease-out infinite;
+    }
+
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(-100px) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(100vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Water Sort Puzzle</h1>
+  <div id="controls">
+    <span>Level: <span id="level">1</span></span>
+    <button onclick="restartGame()">🔄 Restart</button>
+    <button onclick="undoMove()">↩️ Undo</button>
+  </div>
+  <div id="stats">
+    🧠 Moves: <span id="moveCount">0</span>
+  </div>
+  <div id="game"></div>
+  <div id="win-animation">
+    <h2>🎉 Level Complete! 🎉</h2>
+  </div>
+  <div class="confetti" id="confetti"></div>
+  <script>
+    let level = 1;
+    let moveCount = 0;
+    const maxTubeHeight = 4;
+    const game = document.getElementById('game');
+    const winAnimation = document.getElementById('win-animation');
+    const confettiContainer = document.getElementById('confetti');
+    let tubes = [];
+    let selectedTube = null;
+    let moveHistory = [];
+
+    function getColorsForLevel(level) {
+      const baseColors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow', 'cyan', 'pink'];
+      return baseColors.slice(0, Math.min(4 + level - 1, baseColors.length));
+    }
+
+    function generateSolvableTubes() {
+      const colors = getColorsForLevel(level);
+      const tubeCount = colors.length + 2;
+      const colorUnits = colors.flatMap(color => Array(maxTubeHeight).fill(color));
+      for (let i = colorUnits.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [colorUnits[i], colorUnits[j]] = [colorUnits[j], colorUnits[i]];
+      }
+      const tubes = Array(tubeCount).fill().map(() => []);
+      let tubeIndex = 0;
+      for (let color of colorUnits) {
+        while (tubes[tubeIndex].length >= maxTubeHeight) {
+          tubeIndex = (tubeIndex + 1) % (tubeCount - 2);
+        }
+        tubes[tubeIndex].push(color);
+        tubeIndex = (tubeIndex + 1) % (tubeCount - 2);
+      }
+      return tubes;
+    }
+
+    function renderTubes() {
+      game.innerHTML = '';
+      tubes.forEach((tube, index) => {
+        const tubeEl = document.createElement('div');
+        tubeEl.classList.add('tube');
+        if (selectedTube === index) tubeEl.classList.add('selected');
+        tube.forEach(color => {
+          const segment = document.createElement('div');
+          segment.className = 'segment';
+          segment.style.backgroundColor = color;
+          tubeEl.appendChild(segment);
+        });
+        tubeEl.onclick = () => handleTubeClick(index);
+        game.appendChild(tubeEl);
+      });
+      document.getElementById('moveCount').innerText = moveCount;
+    }
+
+    function handleTubeClick(index) {
+      if (selectedTube === null) {
+        if (tubes[index].length === 0) return;
+        selectedTube = index;
+      } else if (selectedTube === index) {
+        selectedTube = null;
+      } else {
+        const previous = JSON.stringify(tubes.map(t => [...t]));
+        if (pour(selectedTube, index)) {
+          moveHistory.push(previous);
+          moveCount++;
+        }
+        selectedTube = null;
+      }
+      renderTubes();
+      checkWin();
+    }
+
+    function pour(from, to) {
+      const source = tubes[from];
+      const dest = tubes[to];
+      if (dest.length >= maxTubeHeight || source.length === 0) return false;
+
+      const topColor = source[source.length - 1];
+      let count = 1;
+      for (let i = source.length - 2; i >= 0; i--) {
+        if (source[i] === topColor) count++;
+        else break;
+      }
+
+      if (dest.length === 0 || dest[dest.length - 1] === topColor) {
+        let poured = 0;
+        while (count-- && dest.length < maxTubeHeight) {
+          dest.push(source.pop());
+          poured++;
+        }
+        return poured > 0;
+      }
+      return false;
+    }
+
+    function checkWin() {
+      const isWin = tubes.every(tube => {
+        return tube.length === 0 || (new Set(tube).size === 1 && tube.length === maxTubeHeight);
+      });
+      if (isWin) {
+        setTimeout(() => {
+          winAnimation.style.display = 'flex';
+          confettiContainer.style.display = 'block';
+          createConfetti();
+          setTimeout(() => {
+            winAnimation.style.display = 'none';
+            confettiContainer.style.display = 'none';
+            level++;
+            document.getElementById('level').innerText = level;
+            restartGame();
+          }, 3000);
+        }, 200);
+      }
+    }
+
+    function createConfetti() {
+      const numConfetti = 100;
+      for (let i = 0; i < numConfetti; i++) {
+        const confettiPiece = document.createElement('div');
+        confettiPiece.style.left = `${Math.random() * 100}vw`;
+        confettiPiece.style.animationDuration = `${Math.random() * 1 + 1.5}s`;
+        confettiPiece.style.backgroundColor = ['#ff0', '#ff6347', '#32cd32', '#1e90ff'][Math.floor(Math.random() * 4)];
+        confettiContainer.appendChild(confettiPiece);
+      }
+    }
+
+    function restartGame() {
+      const colors = getColorsForLevel(level);
+      tubes = generateSolvableTubes();
+      moveHistory = [];
+      selectedTube = null;
+      moveCount = 0;
+      renderTubes();
+    }
+
+    function undoMove() {
+      if (moveHistory.length === 0) return;
+      tubes = JSON.parse(moveHistory.pop());
+      moveCount--;
+      selectedTube = null;
+      renderTubes();
+    }
+
+    restartGame();
+  </script>
+</body>
+</html>
